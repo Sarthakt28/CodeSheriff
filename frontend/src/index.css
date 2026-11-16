@@ -1,0 +1,70 @@
+/* Tailwind layers — order matters */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Custom scrollbar (dark theme) ────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #111827; /* gray-900 */
+}
+::-webkit-scrollbar-thumb {
+  background: #374151; /* gray-700 */
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b5563; /* gray-600 */
+}
+
+/* ── Base resets ───────────────────────────────────────────────── */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    @apply bg-gray-950 text-gray-100 font-sans;
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    @apply text-sheriff-400 hover:text-sheriff-500 transition-colors;
+  }
+}
+
+/* ── Reusable component classes ───────────────────────────────── */
+@layer components {
+  /* Card container */
+  .card {
+    @apply bg-gray-900 border border-gray-800 rounded-xl p-5;
+  }
+
+  /* Primary action button */
+  .btn-primary {
+    @apply bg-sheriff-600 hover:bg-sheriff-700 text-white font-medium
+           px-4 py-2 rounded-lg transition-colors disabled:opacity-50
+           disabled:cursor-not-allowed;
+  }
+
+  /* Secondary / ghost button */
+  .btn-ghost {
+    @apply border border-gray-700 hover:border-gray-500 text-gray-300
+           hover:text-white font-medium px-4 py-2 rounded-lg transition-colors;
+  }
+
+  /* Inline code / suggestion blocks */
+  .code-block {
+    @apply font-mono text-sm bg-gray-950 border border-gray-800
+           rounded-lg p-3 overflow-x-auto text-gray-300;
+  }
+
+  /* Severity badge base */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           text-xs font-semibold;
+  }
+  .badge-error   { @apply badge bg-red-950 text-red-400 border border-red-800; }
+  .badge-warning { @apply badge bg-yellow-950 text-yellow-400 border border-yellow-800; }
+  .badge-info    { @apply badge bg-blue-950 text-blue-400 border border-blue-800; }
+}

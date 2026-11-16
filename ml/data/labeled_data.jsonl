@@ -1,0 +1,20 @@
+{"code": "password = 'hunter2'", "label": "error"}
+{"code": "api_key = 'abc123xyz_secret_key'", "label": "error"}
+{"code": "SECRET_TOKEN = 'ghp_xxxxxxxxxxxxxxxxxxxx'", "label": "error"}
+{"code": "aws_access_key_id = 'AKIAIOSFODNN7EXAMPLE'", "label": "error"}
+{"code": "conn = psycopg2.connect('postgresql://admin:password123@localhost/db')", "label": "error"}
+{"code": "cursor.execute('SELECT * FROM users WHERE id = ' + user_id)", "label": "error"}
+{"code": "cursor.execute(f'DELETE FROM orders WHERE id = {order_id}')", "label": "error"}
+{"code": "try:\n    result = risky_operation()\nexcept:\n    pass", "label": "error"}
+{"code": "try:\n    connect()\nexcept Exception:\n    pass", "label": "warning"}
+{"code": "# TODO: fix this before release", "label": "warning"}
+{"code": "# FIXME: this crashes on empty input", "label": "warning"}
+{"code": "print('DEBUG:', response.json())", "label": "warning"}
+{"code": "print(f'user logged in: {user_id}')", "label": "warning"}
+{"code": "x = x * 86400", "label": "warning"}
+{"code": "timeout = 300", "label": "info"}
+{"code": "def add(a, b):\n    return a + b", "label": "info"}
+{"code": "result = db.query(User).filter(User.id == user_id).first()", "label": "info"}
+{"code": "logger.info('Request received: %s', request.url)", "label": "info"}
+{"code": "password = os.environ.get('DB_PASSWORD')", "label": "info"}
+{"code": "try:\n    result = fetch(url)\nexcept requests.RequestException as e:\n    logger.error('Fetch failed: %s', e)\n    raise", "label": "info"}

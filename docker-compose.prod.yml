@@ -1,0 +1,146 @@
+# docker-compose.prod.yml — Production stack for CodeSheriff
+#
+# Services:
+#   db       — PostgreSQL 16 (persistent volume)
+#   redis    — Redis 7 (task broker)
+#   api      — FastAPI (uvicorn, 4 workers)
+#   worker   — Celery worker (concurrency=4)
+#   frontend — React (nginx, serves static + proxies /api)
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Required env file: .env.prod (copy .env.example and fill in real values)
+
+version: "3.9"
+
+x-api-env: &api-env
+  env_file: .env.prod
+  environment:
+    - DATABASE_URL=postgresql://sheriff:${POSTGRES_PASSWORD}@db:5432/codesheriff
+    - REDIS_URL=redis://redis:6379/0
+
+services:
+
+  # ── Database ──────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: sheriff
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sheriff_pass}
+      POSTGRES_DB: codesheriff
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sheriff -d codesheriff"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── API (FastAPI / uvicorn) ───────────────────────────────────────────────
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: codesheriff-api:latest
+    restart: always
+    command: >
+      uvicorn app.main:app
+        --host 0.0.0.0
+        --port 8000
+        --workers 4
+        --proxy-headers
+        --forwarded-allow-ips="*"
+    <<: *api-env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Celery Worker ─────────────────────────────────────────────────────────
+  worker:
+    image: codesheriff-api:latest
+    restart: always
+    command: >
+      celery -A app.tasks.celery_app worker
+        --loglevel=info
+        --concurrency=4
+        --queues=default
+        --max-tasks-per-child=100
+    <<: *api-env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 2G     # ML model can use up to ~1.5 GB
+
+  # ── Celery Flower (task monitor, optional) ────────────────────────────────
+  flower:
+    image: codesheriff-api:latest
+    restart: always
+    command: >
+      celery -A app.tasks.celery_app flower
+        --port=5555
+        --basic_auth=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-sheriff123}
+    <<: *api-env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+    profiles:
+      - monitoring   # only started with: docker compose --profile monitoring up
+
+  # ── Frontend (nginx) ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_GITHUB_CLIENT_ID: ${VITE_GITHUB_CLIENT_ID}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    image: codesheriff-frontend:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Mount SSL certs for HTTPS (optional — set up cert paths in nginx.conf)
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+
+# ── Volumes ───────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

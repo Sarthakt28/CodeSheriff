@@ -10,10 +10,12 @@ export const removeToken = (): void => localStorage.removeItem(TOKEN_KEY)
 export const isAuthenticated = (): boolean => !!getToken()
 
 // ── Axios instance ──────────────────────────────────────────────────
-// All API calls go through this single instance.
-// Base URL is empty — Vite's proxy forwards /api, /auth to localhost:8000
+// Base URL falls back to empty string for local dev (Vite proxy forwards /api),
+// or uses VITE_API_URL in production (e.g. https://codesheriff-api.onrender.com).
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+
 const api = axios.create({
-  baseURL: '',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

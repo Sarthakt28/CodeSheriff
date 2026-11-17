@@ -10,10 +10,16 @@ export const removeToken = (): void => localStorage.removeItem(TOKEN_KEY)
 export const isAuthenticated = (): boolean => !!getToken()
 
 // ── Axios instance ──────────────────────────────────────────────────
-// Base URL falls back to empty string for local dev (Vite proxy forwards /api),
-// or uses VITE_API_URL in production (e.g. https://codesheriff-api-wgg8.onrender.com).
-// Prepend https:// if Render injects only the hostname (fromService property: host).
-const rawApiUrl = import.meta.env.VITE_API_URL || ''
+// Base URL: uses VITE_API_URL if set, or defaults to production backend on Render
+// when deployed, or falls back to '' for local dev (Vite proxy forwards /api and /auth).
+const rawApiUrl =
+  import.meta.env.VITE_API_URL ||
+  (typeof window !== 'undefined' &&
+  !window.location.hostname.includes('localhost') &&
+  !window.location.hostname.includes('127.0.0.1')
+    ? 'https://codesheriff-api-wgg8.onrender.com'
+    : '')
+
 const API_BASE_URL = rawApiUrl
   ? rawApiUrl.startsWith('http')
     ? rawApiUrl

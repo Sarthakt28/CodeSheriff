@@ -26,8 +26,11 @@ export default function AuthCallback() {
         navigate('/dashboard', { replace: true })
       })
       .catch((err) => {
+        console.error('OAuth callback error:', err)
         const message =
-          err.response?.data?.detail ?? 'Authentication failed. Please try again.'
+          err.response?.data?.detail ||
+          err.message ||
+          'Authentication failed. Please try again.'
         setError(message)
       })
   // eslint-disable-next-line react-hooks/exhaustive-deps

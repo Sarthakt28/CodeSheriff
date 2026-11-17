@@ -2,7 +2,7 @@ import { Github, Shield, Zap, Eye } from 'lucide-react'
 
 // GitHub OAuth authorization URL — redirects user to GitHub's permission screen
 const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${
-  import.meta.env.VITE_GITHUB_CLIENT_ID ?? ''
+  import.meta.env.VITE_GITHUB_CLIENT_ID || 'Ov23liJ4rBIBQK49dO6M'
 }&scope=repo,read:user&allow_signup=true`
 
 // Feature highlights shown on the login page

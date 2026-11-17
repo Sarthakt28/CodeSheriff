@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     USE_ML_REVIEWER: bool = False
 
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,https://codesheriff-frontend.onrender.com"
 
     class Config:
         env_file = ENV_FILE

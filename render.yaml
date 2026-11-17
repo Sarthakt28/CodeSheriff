@@ -33,7 +33,7 @@ services:
       - key: USE_ML_REVIEWER
         value: "false"
       - key: ALLOWED_ORIGINS
-        value: "*"
+        value: "http://localhost:5173,https://codesheriff-frontend.onrender.com"
 
   # ── 2. Frontend Static Site (React SPA) ──────────────────────────────────────
   - type: web

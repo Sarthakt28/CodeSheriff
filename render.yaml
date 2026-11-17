@@ -36,10 +36,8 @@ services:
         value: "*"
 
   # ── 2. Frontend Static Site (React SPA) ──────────────────────────────────────
-  - type: web
+  - type: static
     name: codesheriff-frontend
-    runtime: static
-    plan: free
     rootDir: frontend
     buildCommand: "npm install && npm run build"
     staticPublishPath: dist

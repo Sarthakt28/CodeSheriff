@@ -4,13 +4,22 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-# Fixed absolute path for SQLite fallback so all processes (FastAPI + Celery) share the exact same DB
-SQLITE_DB_PATH = Path("D:/CodeSheriff/codesheriff_local.db").resolve()
-FALLBACK_SQLITE_URL = f"sqlite:///{SQLITE_DB_PATH.as_posix()}"
+# Base directory for relative database fallback (cross-platform Linux & Windows)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+FALLBACK_SQLITE_PATH = BASE_DIR / "codesheriff_local.db"
+FALLBACK_SQLITE_URL = f"sqlite:///{FALLBACK_SQLITE_PATH.as_posix()}"
 
-# Engine — with SQLite fallback for local dev without Postgres
+# Normalize PostgreSQL URL for SQLAlchemy compatibility
+# (Render provides postgres:// or postgresql://; SQLAlchemy requires explicit driver)
+db_url = settings.DATABASE_URL
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+elif db_url.startswith("postgresql://") and "+psycopg" not in db_url:
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+# Engine initialization
 try:
-    engine = create_engine(settings.DATABASE_URL)
+    engine = create_engine(db_url, pool_pre_ping=True)
     with engine.connect() as conn:
         pass
     print("[DATABASE] Connected to PostgreSQL successfully.")

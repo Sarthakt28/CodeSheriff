@@ -48,12 +48,9 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_GITHUB_CLIENT_ID
-        sync: false
+        value: "Ov23liJ4rBIBQK49dO6M"
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: codesheriff-api
-          property: host
+        value: "https://codesheriff-api-wgg8.onrender.com"
 
   # ── 3. Redis / KeyValue Task Broker ─────────────────────────────────────────
   - type: keyvalue

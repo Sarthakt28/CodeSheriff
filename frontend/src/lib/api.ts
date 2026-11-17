@@ -11,8 +11,14 @@ export const isAuthenticated = (): boolean => !!getToken()
 
 // ── Axios instance ──────────────────────────────────────────────────
 // Base URL falls back to empty string for local dev (Vite proxy forwards /api),
-// or uses VITE_API_URL in production (e.g. https://codesheriff-api.onrender.com).
-const API_BASE_URL = import.meta.env.VITE_API_URL || ''
+// or uses VITE_API_URL in production (e.g. https://codesheriff-api-wgg8.onrender.com).
+// Prepend https:// if Render injects only the hostname (fromService property: host).
+const rawApiUrl = import.meta.env.VITE_API_URL || ''
+const API_BASE_URL = rawApiUrl
+  ? rawApiUrl.startsWith('http')
+    ? rawApiUrl
+    : `https://${rawApiUrl}`
+  : ''
 
 const api = axios.create({
   baseURL: API_BASE_URL,

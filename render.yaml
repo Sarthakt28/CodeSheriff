@@ -1,5 +1,5 @@
 # render.yaml — Render Infrastructure as Code for CodeSheriff
-# Automatically deploys: Managed PostgreSQL, Redis, FastAPI Backend + Celery Worker, and React Frontend.
+# Automatically deploys: Managed PostgreSQL, Valkey/Redis, FastAPI Backend + Celery Worker, and React Frontend.
 
 services:
   # ── 1. Backend Web Service (FastAPI + Embedded Celery Worker) ───────────────
@@ -19,7 +19,7 @@ services:
           property: connectionString
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: codesheriff-redis
           property: connectionString
       - key: GITHUB_CLIENT_ID
@@ -36,8 +36,9 @@ services:
         value: "*"
 
   # ── 2. Frontend Static Site (React SPA) ──────────────────────────────────────
-  - type: static
+  - type: web
     name: codesheriff-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: "npm install && npm run build"
     staticPublishPath: dist
@@ -54,8 +55,8 @@ services:
           name: codesheriff-api
           property: host
 
-  # ── 3. Redis Broker ─────────────────────────────────────────────────────────
-  - type: redis
+  # ── 3. Redis / KeyValue Task Broker ─────────────────────────────────────────
+  - type: keyvalue
     name: codesheriff-redis
     region: oregon
     plan: free
